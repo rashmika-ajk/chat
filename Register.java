@@ -3,16 +3,13 @@ package com.example.test;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.content.Intent;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.Toast;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+import android.content.Intent;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.AuthResult;
@@ -21,93 +18,72 @@ import com.google.android.gms.tasks.Task;
 
 public class Register extends AppCompatActivity {
     Button register, login;
-    EditText username, email, password, cp;
-    ProgressBar Load;
+    EditText username, email0, password0, cp;
     private FirebaseAuth mAuth;
 
-
-    @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.register);
         mAuth = FirebaseAuth.getInstance();
         setContentView(R.layout.register);
         register = (Button) findViewById(R.id.register);
-        login = (Button) findViewById(R.id.login);
+        //login = (Button) findViewById(R.id.login);
         username = (EditText) findViewById(R.id.user);
-        email = (EditText) findViewById(R.id.email);
-        password = (EditText) findViewById(R.id.password);
+        email0 = (EditText) findViewById(R.id.email);
+        password0 = (EditText) findViewById(R.id.password);
         cp = (EditText) findViewById(R.id.cp);
-        Load = (ProgressBar) findViewById(R.id.pr);
+
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                registerNewUser();
+                UserRegister();
             }
         });
     }
 
-    private void registerNewUser() {
+    private void UserRegister() {
+        String Name, Email, Password;
+        Name = username.getText().toString().trim();
+        Email = email0.getText().toString().trim();
+        Password = password0.getText().toString().trim();
 
-        // show the visibility of progress bar to show loading
-        Load.setVisibility(View.VISIBLE);
-
-        // Take the value of two edit texts in Strings
-        String User0, Pass0;
-        User0 = email.getText().toString();
-        Pass0 = password.getText().toString();
-
-        // Validations for input email and password
-        if (TextUtils.isEmpty(User0)) {
-            Toast.makeText(getApplicationContext(),
-                    "Please enter email!!",
-                    Toast.LENGTH_LONG)
-                    .show();
+        if (TextUtils.isEmpty(Name)) {
+            Toast.makeText(Register.this, "Enter Name", Toast.LENGTH_SHORT).show();
             return;
-        }
-        if (TextUtils.isEmpty(Pass0)) {
-            Toast.makeText(getApplicationContext(),
-                    "Please enter password!!",
-                    Toast.LENGTH_LONG)
-                    .show();
+        } else if (TextUtils.isEmpty(Email)) {
+            Toast.makeText(Register.this, "Enter Email", Toast.LENGTH_SHORT).show();
+            return;
+        } else if (TextUtils.isEmpty(Password)) {
+            Toast.makeText(Register.this, "Enter Password", Toast.LENGTH_SHORT).show();
+            return;
+        } else if (Password.length() < 6) {
+            Toast.makeText(Register.this, "Password must be greater then 6 digit", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // create new user or register new user
-        mAuth
-                .createUserWithEmailAndPassword(User0, Pass0)
-                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+        mAuth.createUserWithEmailAndPassword(Email, Password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
 
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(getApplicationContext(),
-                                    "Registration successful!",
-                                    Toast.LENGTH_LONG)
-                                    .show();
+                    Toast.makeText(getApplicationContext(),
+                            "Registration successful!",
+                            Toast.LENGTH_LONG)
+                            .show();
 
-                            // hide the progress bar
-                            Load.setVisibility(View.GONE);
+                    // hide the progress bar
 
-                            // if the user created intent to login activity
-                            Intent intent
-                                    = new Intent(Register.this,
-                                    MainActivity.class);
-                            startActivity(intent);
-                        } else {
+                    // if the user created intent to login activity
+                    Intent intent
+                            = new Intent(Register.this,
+                            MainActivity.class);
+                    startActivity(intent);
 
-                            // Registration failed
-                            Toast.makeText(
-                                    getApplicationContext(),
-                                    "Registration failed!!"
-                                            + " Please try again later",
-                                    Toast.LENGTH_LONG)
-                                    .show();
-
-                            // hide the progress bar
-                            Load.setVisibility(View.GONE);
-                        }
-                    }
-                });
+                } else {
+                    Toast.makeText(Register.this, "error on creating user", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 }
